@@ -1,4 +1,3 @@
--std=c++17
 -Icore/include
 -Iapp/include
 -Iextern

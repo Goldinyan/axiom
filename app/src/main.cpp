@@ -22,6 +22,7 @@ core::mesh.
 *
 */
 
+/*
 #include "fmt/format.h"
 #include "app/input_handler.hpp"
 #include "app/renderer/scene.hpp"
@@ -69,5 +70,35 @@ int main(int argc, char *argv[])
         // glfwSwapBuffers(window);
     }
 
+    return 0;
+}
+*/
+
+
+#include "app/camera.hpp" 
+#include "raylib.h"
+
+int main() {
+    InitWindow(960, 1280, "Axiom");
+    
+    Axiom::CameraManager cameraManager;
+
+    SetTargetFPS(120);
+
+    while (!WindowShouldClose()) {
+        cameraManager.update();
+
+        BeginDrawing();
+            ClearBackground(RAYWHITE);
+            
+            BeginMode3D(cameraManager.getRawCamera());
+                DrawGrid(10, 1.0f);
+            EndMode3D();
+
+            DrawFPS(10, 10);
+        EndDrawing();
+    }
+
+    CloseWindow();
     return 0;
 }
