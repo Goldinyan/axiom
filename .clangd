@@ -1,0 +1,4 @@
+CompileFlags:
+  Add: ["-Iinclude", "-I/opt/homebrew/include", "-std=c11", "-Wall", "-Wextra"]
+
+  FallbackStyle: none
