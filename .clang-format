@@ -1,4 +1,11 @@
 BasedOnStyle: LLVM
 BreakBeforeBraces: Allman
-IndentWidth: 4
 ColumnLimit: 0
+NamespaceIndentation: None
+
+# Die Basis-Einrückung für alles
+IndentWidth: 8
+
+# Den Modifier (public) wieder 4 Leerzeichen nach links schieben
+# So landet public bei 4, und der Code (Lexer) bei 8.
+AccessModifierOffset: -8
