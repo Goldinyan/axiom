@@ -1,3 +1,72 @@
+
+#include "../../core/src/tokenizer/Lexer.hpp"
+#include "fmt/core.h"
+#include <iostream>
+
+// Nur inkludieren, wenn wir NICHT im CLI-Modus sind
+#ifndef NO_UI
+#include "app/camera.hpp"
+#include "raylib.h"
+#endif
+
+int main()
+{
+#ifdef NO_UI
+        // --- CLI DEBUG MODUS ---
+        fmt::print("Axiom CLI Debug Mode\n");
+        fmt::print("--------------------\n");
+
+        Axiom::Lexer lexer("g(x, y) = x - y");
+        auto tokens = lexer.tokenize();
+
+        fmt::print("TOKENS:\n");
+        for (const auto &token : tokens)
+        {
+                fmt::print("  -> Lexeme='{}', Type={}\n", token.lexeme, (int)token.type);
+        }
+
+        fmt::print("--------------------\n");
+        fmt::print("Lexing beendet.\n");
+
+#else
+        // --- NORMALER UI MODUS (RAYLIB) ---
+        InitWindow(960, 1280, "Axiom");
+
+        Axiom::CameraManager cameraManager;
+
+        // Auch im UI Modus können wir kurz die Tokens in die Konsole werfen
+        Axiom::Lexer lexer("f(x) = x*2");
+        lexer.tokenize();
+        auto tokens = lexer.get_tokens();
+
+        for (const auto &token : tokens)
+        {
+                fmt::print("Token: Lexeme='{}', Type={}\n", token.lexeme, (int)token.type);
+        }
+
+        SetTargetFPS(120);
+
+        while (!WindowShouldClose())
+        {
+                cameraManager.update();
+
+                BeginDrawing();
+                ClearBackground(RAYWHITE);
+
+                BeginMode3D(cameraManager.getRawCamera());
+                DrawGrid(10, 1.0f);
+                EndMode3D();
+
+                DrawFPS(10, 10);
+                EndDrawing();
+        }
+
+        CloseWindow();
+#endif
+
+        return 0;
+}
+
 /*
  *Der Kleber. Initialisiert das Fenster, startet den Loop, ruft den
  * input_handler auf und lässt den renderer alles zeichnen.
@@ -74,45 +143,3 @@ int main(int argc, char *argv[])
 }
 */
 
-#include "../../core/src/tokenizer/Lexer.hpp"
-#include "app/camera.hpp"
-#include "fmt/core.h"
-#include "raylib.h"
-#import <iostream>
-
-int main()
-{
-        InitWindow(960, 1280, "Axiom");
-
-        Axiom::CameraManager cameraManager;
-        Axiom::Lexer lexer("f(x) = x*2");
-        lexer.tokenize();
-        lexer.get_tokens();
-        auto tokens = lexer.get_tokens();
-        std::cout << "TOKENS::\n"; 
-        for (const auto &token : tokens)
-        {
-                std::cout << fmt::format("Token: Lexeme='{}', Type={}\n",
-                                         token.lexeme, (int)token.type);
-        }
-
-        SetTargetFPS(120);
-
-        while (!WindowShouldClose())
-        {
-                cameraManager.update();
-
-                BeginDrawing();
-                ClearBackground(RAYWHITE);
-
-                BeginMode3D(cameraManager.getRawCamera());
-                DrawGrid(10, 1.0f);
-                EndMode3D();
-
-                DrawFPS(10, 10);
-                EndDrawing();
-        }
-
-        CloseWindow();
-        return 0;
-}

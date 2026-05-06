@@ -13,10 +13,11 @@ class Expression
 {
 
 public:
-        std::int32_t eval(std::optional<int32_t> x, std::optional<int32_t> y);
+        float eval(std::optional<int32_t> x, std::optional<int32_t> y);
 
-private:
-        std::vector<TokenType> tokens;
+        // f(x) = x*y {x != 0}
+        char func_name;
+        std::vector<TokenType> function_body;
         std::vector<char> params;
         std::vector<std::string> limits;
 };

@@ -8,6 +8,7 @@ enum class TokenType
 {
         // Literals & Variables
         Number,
+        Char,
         X,
         Y,
         Z,

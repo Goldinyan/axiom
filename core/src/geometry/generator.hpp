@@ -1,0 +1,19 @@
+#pragma once
+
+#include "Vector3.hpp"
+#include <utility>
+#include <vector>
+#include "../tokenizer/Expression.hpp"
+
+namespace Axiom
+{
+
+class Generator
+{
+public:
+        Generator();
+
+        std::vector<Vector3> generate(Expression expr, std::pair<Vector3, Vector3> limits, float step);
+private:
+};
+} // namespace Axiom

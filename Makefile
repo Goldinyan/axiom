@@ -2,28 +2,29 @@
 CXX      := g++
 CXXFLAGS := -std=c++17 -Wall -Wextra -O3
 
-# Homebrew Pfade
 BREW_INC := /opt/homebrew/include
 BREW_LIB := /opt/homebrew/lib
-
-# Include-Pfade
 INCLUDES := -Icore/include -Iapp/include -Iextern -I$(BREW_INC)
 
-# --- Libraries für Raylib auf macOS ---
-# Wir brauchen -lraylib und die macOS System-Frameworks
+# Standard Libraries (mit Raylib)
 LIBS     := -L$(BREW_LIB) -lfmt -lraylib -framework CoreVideo -framework IOKit -framework Cocoa -framework GLUT -framework OpenGL
 
-# --- Verzeichnisse ---
+# CLI Libraries (ohne Raylib)
+DEBUG_LIBS := -L$(BREW_LIB) -lfmt
+
 OBJ_DIR  := obj
 BIN_DIR  := bin
 
-# --- Dateien finden ---
+# Dateien finden
 CORE_SRCS := $(shell find core/src -name "*.cpp")
 APP_SRCS  := $(shell find app/src -name "*.cpp")
 ALL_SRCS  := $(CORE_SRCS) $(APP_SRCS)
 
+# Alle Objekt-Dateien
 OBJS      := $(patsubst %.cpp, $(OBJ_DIR)/%.o, $(ALL_SRCS))
-TARGET    := $(BIN_DIR)/axiom
+
+TARGET       := $(BIN_DIR)/axiom
+DEBUG_TARGET := $(BIN_DIR)/axiom_debug
 
 # --- Regeln ---
 all: $(TARGET)
@@ -45,30 +46,23 @@ clean:
 run: all
 	./$(TARGET)
 
-.PHONY: all clean run
+# --- CLI DEBUG REGELN ---
 
-# nur zum lexer testen::make cli
+# Wir definieren cli_run so, dass es das Flag setzt und ALLES neu baut oder 
+# zumindest die kritischen Dateien bereinigt.
+cli: CXXFLAGS += -DNO_UI
+cli: clean_main_and_ui debug
+	./$(DEBUG_TARGET)
 
-# Neues Target für CLI
-DEBUG_TARGET := $(BIN_DIR)/axiom_debug
-DEBUG_LIBS   := -L$(BREW_LIB) -lfmt  # KEIN raylib, KEINE Frameworks
-
-# --- Neue Regeln ---
-
-# Aufruf via: make debug
 debug: $(OBJS)
 	@mkdir -p $(BIN_DIR)
 	@echo "Linking CLI Debug: $(DEBUG_TARGET)"
 	$(CXX) $(OBJS) -o $(DEBUG_TARGET) $(DEBUG_LIBS)
 
-# Spezielle Regel für das Kompilieren mit NO_UI
-# Wir müssen hier aufpassen: Wenn wir zwischen UI und No-UI wechseln, 
-# sollten wir die .o Dateien neu bauen oder ein zweites Verzeichnis nutzen.
-cli: CXXFLAGS += -DNO_UI
-cli: clean_objs debug
-	./$(DEBUG_TARGET)
+clean_main_and_ui:
+	@echo "Cleaning UI-dependent objects for CLI mode..."
+	@rm -f $(OBJ_DIR)/app/src/main.o
+	@rm -f $(OBJ_DIR)/app/src/camera.o
+	@rm -f $(OBJ_DIR)/app/src/input_handler.o
 
-clean_objs:
-	rm -rf $(OBJ_DIR)/app/src/main.o # Nur main muss zwingend neu für das Flag
-
-.PHONY: debug cli clean_objs
+.PHONY: all clean run debug cli clean_main_and_ui
