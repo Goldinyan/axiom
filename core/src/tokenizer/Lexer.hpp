@@ -15,6 +15,7 @@ public:
         Lexer(const std::string &expression);
 
         const std::vector<Token> &tokenize();
+        std::vector<Token> get_tokens();
 
 private:
         void handle_token();

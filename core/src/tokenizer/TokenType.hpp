@@ -8,7 +8,9 @@ enum class TokenType
 {
         // Literals & Variables
         Number,
-        Param, // x, y, z
+        X,
+        Y,
+        Z,
 
         // Single Character Tokens
         LeftParen,  // (
@@ -42,7 +44,9 @@ enum class TokenType
 
 static std::vector<TokenType> KEYWORDS{
     TokenType::Number,
-    TokenType::Param, // x, y, z
+    TokenType::X, // x, y, z
+    TokenType::Y, // x, y, z
+    TokenType::Z, // x, y, z
 
     // Single Character Tokens
     TokenType::LeftParen,  // (

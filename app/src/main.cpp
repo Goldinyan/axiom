@@ -74,31 +74,45 @@ int main(int argc, char *argv[])
 }
 */
 
-
-#include "app/camera.hpp" 
+#include "../../core/src/tokenizer/Lexer.hpp"
+#include "app/camera.hpp"
+#include "fmt/core.h"
 #include "raylib.h"
+#import <iostream>
 
-int main() {
-    InitWindow(960, 1280, "Axiom");
-    
-    Axiom::CameraManager cameraManager;
+int main()
+{
+        InitWindow(960, 1280, "Axiom");
 
-    SetTargetFPS(120);
+        Axiom::CameraManager cameraManager;
+        Axiom::Lexer lexer("f(x) = x*2");
+        lexer.tokenize();
+        lexer.get_tokens();
+        auto tokens = lexer.get_tokens();
+        std::cout << "TOKENS::\n"; 
+        for (const auto &token : tokens)
+        {
+                std::cout << fmt::format("Token: Lexeme='{}', Type={}\n",
+                                         token.lexeme, (int)token.type);
+        }
 
-    while (!WindowShouldClose()) {
-        cameraManager.update();
+        SetTargetFPS(120);
 
-        BeginDrawing();
-            ClearBackground(RAYWHITE);
-            
-            BeginMode3D(cameraManager.getRawCamera());
+        while (!WindowShouldClose())
+        {
+                cameraManager.update();
+
+                BeginDrawing();
+                ClearBackground(RAYWHITE);
+
+                BeginMode3D(cameraManager.getRawCamera());
                 DrawGrid(10, 1.0f);
-            EndMode3D();
+                EndMode3D();
 
-            DrawFPS(10, 10);
-        EndDrawing();
-    }
+                DrawFPS(10, 10);
+                EndDrawing();
+        }
 
-    CloseWindow();
-    return 0;
+        CloseWindow();
+        return 0;
 }
