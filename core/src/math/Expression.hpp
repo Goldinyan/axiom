@@ -20,7 +20,7 @@ public:
         // f(x) = x*y {x != 0}
         char func_name;
         std::vector<TokenType> function_body;
-        std::vector<char> params;
+        std::array<bool, 2> params; // 0 -> x, 1 -> y
         std::vector<std::string> limits;
 };
 } // namespace Axiom

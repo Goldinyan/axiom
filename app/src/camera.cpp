@@ -5,9 +5,9 @@
 #ifndef NO_UI
 #include "raylib.h"
 
-static float angleAzi = 45.0f * DEG2RAD;
-static float angleElev = 45.0f * DEG2RAD;
-static float radius = 15.0f;
+static float angleAzi = -45.0f * DEG2RAD;
+static float angleElev = 20.0f * DEG2RAD;
+static float radius = 90.0f;
 
 namespace Axiom
 {
@@ -29,7 +29,8 @@ CameraManager::CameraManager()
         m_camera = {0};
         m_camera.position = (Vector3){10.0f, 10.0f, 10.0f};
         m_camera.target = (Vector3){0.0f, 0.0f, 0.0f}; // Der Punkt, um den wir kreisen
-        m_camera.up = (Vector3){0.0f, 1.0f, 0.0f};
+        // bei {0, 1, 0} wäre die y achse oben, aber so ist die z wie gewollt
+        m_camera.up = (Vector3){0.0f, 0.0f, 1.0f};
         m_camera.fovy = 45.0f;
         m_camera.projection = CAMERA_PERSPECTIVE;
 
@@ -55,12 +56,14 @@ void CameraManager::update()
         radius -= mouseWheel * 1.0f;
         if (radius < 1.0f)
                 radius = 1.0f;
+        if (radius > 200.0f)
+                radius = 200.0f;
 
         // 4. Position auf der Kugel berechnen (Sphärische zu Kartesische Koordinaten)
-        m_camera.position.x = m_camera.target.x + radius * cosf(angleElev) * sinf(angleAzi);
-        m_camera.position.y = m_camera.target.y + radius * sinf(angleElev);
-        m_camera.position.z = m_camera.target.z + radius * cosf(angleElev) * cosf(angleAzi);
 
+        m_camera.position.x = m_camera.target.x + radius * cosf(angleElev) * cosf(angleAzi);
+        m_camera.position.y = m_camera.target.y + radius * cosf(angleElev) * sinf(angleAzi);
+        m_camera.position.z = m_camera.target.z + radius * sinf(angleElev);
 }
 
 } // namespace Axiom

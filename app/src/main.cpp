@@ -8,7 +8,10 @@
 #ifndef NO_UI
 #include "app/camera.hpp"
 #include "raylib.h"
+#include "rlgl.h"
 #endif
+
+void draw_grid();
 
 int main()
 {
@@ -49,7 +52,9 @@ int main()
         auto tokens = lexer.get_tokens();
 
         Axiom::Generator generator;
-        auto points = generator.generate(Axiom::Expression(), {{-10, -10, -10}, {10, 10, 10}}, 10);
+        Axiom::Expression expr;
+        expr.params = {true, false};
+        auto points = generator.generate(expr, {{-15, -15, -15}, {15, 15, 15}}, 300);
 
         /*for (const auto &token : tokens)
         {
@@ -64,6 +69,7 @@ int main()
         SetTargetFPS(120);
 
         Axiom::Vector3 point = points[0];
+        size_t index = 0;
 
         while (!WindowShouldClose())
         {
@@ -71,17 +77,28 @@ int main()
 
                 BeginDrawing();
                 ClearBackground(DARKGRAY);
-                BeginMode3D(cameraManager.getRawCamera());
-                DrawGrid(20, 1.0f);
 
+                BeginMode3D(cameraManager.getRawCamera());
+                // draw_grid();
                 for (const auto &p : points)
                 {
-                        DrawLine3D((Vector3) {point.x, point.y, point.z}, (Vector3) {p.x, p.y, p.z}, GREEN);
+                        //DrawLine3D((Vector3){point.x, point.y, point.z}, (Vector3){p.x, p.y, p.z}, GREEN);
+                        DrawPoint3D({p.x, p.y, p.z}, GREEN);
                         point = p;
+                        index++;
+                        if (index >= points.size())
+                        {
+                                index = 0;
+                                point = points[0];
+                        }
                 }
 
-                EndMode3D();
+                DrawLine3D({-20, 0, 0}, {20, 0, 0}, RAYWHITE);
+                DrawTriangle3D({21, 0, 0}, {20, 1, 0}, {20, -1, 0}, RAYWHITE);
+                DrawLine3D({0, -20, 0}, {0, 20, 0}, RAYWHITE);
+                DrawLine3D({0, 0, -20}, {0, 0, 20}, RAYWHITE);
 
+                EndMode3D();
                 DrawFPS(10, 10);
                 EndDrawing();
         }
@@ -90,6 +107,23 @@ int main()
 #endif
 
         return 0;
+}
+
+void draw_grid()
+{
+
+        // 1. Das normale, horizontale Grid (XZ-Ebene)
+        DrawGrid(20, 1.0f);
+
+        rlPushMatrix();         // Speichert den aktuellen Zustand der Welt
+        rlRotatef(90, 1, 0, 0); // Rotiere um 90 Grad um die X-Achse
+        DrawGrid(20, 1.0f);     // Zeichne das Grid (es ist jetzt vertikal)
+        rlPopMatrix();          // Stellt den Zustand wieder her
+
+        rlPushMatrix();
+        rlRotatef(90, 0, 0, 1); // Rotiere um 90 Grad um die Z-Achse
+        DrawGrid(20, 1.0f);
+        rlPopMatrix();
 }
 
 /*
