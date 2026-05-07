@@ -1,5 +1,7 @@
-#include "generator.hpp"
+#include "Generator.hpp"
+#include "../utils/logger.hpp"
 #include "Vector3.hpp"
+#include "fmt/core.h"
 #include <vector>
 
 namespace Axiom
@@ -9,7 +11,8 @@ Generator::Generator() {};
 
 std::vector<Vector3> Generator::generate(Expression expr, std::pair<Vector3, Vector3> limits, float step)
 {
-        int resolution = 100; // 100 Punkte pro achse
+        Logger::info("Generating points");
+        int resolution = step ? step : 100; // 100 Punkte pro achse
         std::vector<Vector3> points;
         points.reserve((resolution + 1) * (resolution + 1));
 
@@ -28,7 +31,11 @@ std::vector<Vector3> Generator::generate(Expression expr, std::pair<Vector3, Vec
                 {
                         float y = y_start + (static_cast<float>(j) / resolution) * y_range;
                         float z = expr.eval(x, y);
-                        points.emplace_back(x, y, z);
+                        if (z >= limits.first.z && z <= limits.second.z)
+                        { // Nur Punkte innerhalb der z-Limits hinzufügen
+                                points.emplace_back(x, y, z);
+                                fmt::print("Evaluating at x={}, y={} -> z{}\n", x, y, z);
+                        }
                 }
         }
 

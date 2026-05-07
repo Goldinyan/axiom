@@ -1,4 +1,12 @@
-/*
- * Definiert die Knoten des AST. Ein Knoten für + weiß, wie er seine zwei
- * Kinder-Knoten addiert. Dies ist die Basis für die rekursive Auswertung.
- */
+
+
+#include "Expression.hpp"
+namespace Axiom
+{
+
+float Expression::eval(std::optional<float> x, std::optional<float> y)
+{
+        return static_cast<float>(x.value_or(0.0f));
+}
+
+} // namespace Axiom

@@ -1,4 +1,5 @@
 
+#include "../../core/src/geometry/Generator.hpp"
 #include "../../core/src/tokenizer/Lexer.hpp"
 #include "fmt/core.h"
 #include <iostream>
@@ -27,6 +28,14 @@ int main()
 
         fmt::print("--------------------\n");
         fmt::print("Lexing beendet.\n");
+        fmt::print("Debug Points.\n");
+        Axiom::Generator generator;
+        auto points = generator.generate(Axiom::Expression(), {{-10, -10, -10}, {10, 10, 10}}, 10);
+        fmt::print("Generierte Punkte:\n");
+        for (const auto &point : points)
+        {
+                fmt::print("  -> ({}, {}, {})\n", point.x, point.y, point.z);
+        }
 
 #else
         // --- NORMALER UI MODUS (RAYLIB) ---
@@ -39,22 +48,38 @@ int main()
         lexer.tokenize();
         auto tokens = lexer.get_tokens();
 
-        for (const auto &token : tokens)
+        Axiom::Generator generator;
+        auto points = generator.generate(Axiom::Expression(), {{-10, -10, -10}, {10, 10, 10}}, 10);
+
+        /*for (const auto &token : tokens)
         {
                 fmt::print("Token: Lexeme='{}', Type={}\n", token.lexeme, (int)token.type);
         }
 
+        for (const auto &p : points)
+        {
+                fmt::print("Punkt: ({}, {}, {})\n", p.x, p.y, p.z);
+        }*/
+
         SetTargetFPS(120);
+
+        Axiom::Vector3 point = points[0];
 
         while (!WindowShouldClose())
         {
                 cameraManager.update();
 
                 BeginDrawing();
-                ClearBackground(RAYWHITE);
-
+                ClearBackground(DARKGRAY);
                 BeginMode3D(cameraManager.getRawCamera());
-                DrawGrid(10, 1.0f);
+                DrawGrid(20, 1.0f);
+
+                for (const auto &p : points)
+                {
+                        DrawLine3D((Vector3) {point.x, point.y, point.z}, (Vector3) {p.x, p.y, p.z}, GREEN);
+                        point = p;
+                }
+
                 EndMode3D();
 
                 DrawFPS(10, 10);
@@ -142,4 +167,3 @@ int main(int argc, char *argv[])
     return 0;
 }
 */
-

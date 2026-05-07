@@ -35,7 +35,7 @@ const std::vector<Token> &Lexer::tokenize()
 
 void Lexer::handle_token()
 {
-        std::cout << "Handling Token!\n";
+        //std::cout << "Handling Token!\n";
         auto c{current()};
 
         m_current++; // inc bc we already have cur c

@@ -1,6 +1,6 @@
 #include "Parser.hpp"
 #include "../utils/logger.hpp"
-#include "Expression.hpp"
+#include "../math/Expression.hpp"
 #include "TokenType.hpp"
 #include <vector>
 

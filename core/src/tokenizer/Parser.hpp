@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Expression.hpp"
+#include "../math/Expression.hpp"
 #include "Token.hpp"
 #include <vector>
 

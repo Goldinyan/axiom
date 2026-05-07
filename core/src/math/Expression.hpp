@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TokenType.hpp"
+#include "../tokenizer/TokenType.hpp"
 #include <cstdint>
 #include <optional>
 #include <string>
@@ -13,7 +13,9 @@ class Expression
 {
 
 public:
-        float eval(std::optional<int32_t> x, std::optional<int32_t> y);
+        Expression() = default;
+
+        float eval(std::optional<float> x, std::optional<float> y);
 
         // f(x) = x*y {x != 0}
         char func_name;

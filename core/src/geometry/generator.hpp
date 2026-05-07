@@ -3,7 +3,7 @@
 #include "Vector3.hpp"
 #include <utility>
 #include <vector>
-#include "../tokenizer/Expression.hpp"
+#include "../math/Expression.hpp"
 
 namespace Axiom
 {
