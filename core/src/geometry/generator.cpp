@@ -3,6 +3,7 @@
 #include "Vector3.hpp"
 #include "fmt/core.h"
 #include <vector>
+#include <cmath>
 
 namespace Axiom
 {
@@ -78,9 +79,9 @@ std::vector<Vector3> Generator::generate(Expression expr, std::pair<Vector3, Vec
                                                 z = limits.first.z;
                                         points.emplace_back(x, y, z);
                                 } else {
-                                        // Skip Punkte außerhalb der Limits
+                                        // Mark Punkte außerhalb der Limits als NaN
                                         if (z > limits.second.z || z < limits.first.z)
-                                                continue;
+                                                z = NAN;
                                         points.emplace_back(x, y, z);
                                 }
                         }

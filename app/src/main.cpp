@@ -57,12 +57,12 @@ int main()
         Axiom::Expression expr;
         Axiom::UIManager uiManager;
         expr.params = {true, true};
-        
-        bool clampZ = true;  // Toggle zwischen Clamp und Skip
-        
-        auto points = generator.generate(expr, {{-15, -15, -15}, {15, 15, 15}}, 200, clampZ);
 
-        Mesh surfaceMesh = Axiom::MeshBuilder::CreateMeshFromPoints(points, 200);
+        bool clampZ = true; // Toggle zwischen Clamp und Skip
+
+        auto points = generator.generate(expr, {{-15, -15, -15}, {15, 15, 15}}, 100, clampZ);
+
+        Mesh surfaceMesh = Axiom::MeshBuilder::CreateMeshFromPoints(points, 100);
         Model surfaceModel = LoadModelFromMesh(surfaceMesh);
         surfaceModel.materials[0].maps[MATERIAL_MAP_DIFFUSE].color = Axiom::POINTS_COLOR_PLOTTER;
 
@@ -71,20 +71,20 @@ int main()
         while (!WindowShouldClose())
         {
                 cameraManager.update();
-                
-                // Toggle clampZ mit Leertaste
-                if (IsKeyPressed(KEY_SPACE)) {
+
+                if (IsKeyPressed(KEY_SPACE))
+                {
                         clampZ = !clampZ;
                         UnloadModel(surfaceModel);
-                        auto newPoints = generator.generate(expr, {{-15, -15, -15}, {15, 15, 30}}, 200, clampZ);
-                        Mesh newMesh = Axiom::MeshBuilder::CreateMeshFromPoints(newPoints, 200);
+                        auto newPoints = generator.generate(expr, {{-15, -15, -15}, {15, 15, 15}}, 100, clampZ);
+                        Mesh newMesh = Axiom::MeshBuilder::CreateMeshFromPoints(newPoints, 100);
                         surfaceModel = LoadModelFromMesh(newMesh);
                         surfaceModel.materials[0].maps[MATERIAL_MAP_DIFFUSE].color = Axiom::POINTS_COLOR_PLOTTER;
                 }
 
                 BeginDrawing();
                 ClearBackground(Axiom::BACKGROUND_COLOR_PLOTTER);
-        
+
                 draw_plotter(surfaceModel, cameraManager);
 
                 uiManager.draw();
@@ -103,10 +103,10 @@ int main()
 void draw_plotter(Model surfaceModel, Axiom::CameraManager &cameraManager)
 {
         BeginMode3D(cameraManager.getRawCamera());
-        
+
         DrawModel(surfaceModel, {0, 0, 0}, 1.0f, WHITE);
-        
-        DrawModelWires(surfaceModel, {0, 0, 0}, 1.0f, Axiom::POINTS_COLOR_PLOTTER);
+
+        DrawModelWires(surfaceModel, {0, 0, 0}, 1.0f, RAYWHITE);
 
         DrawLine3D({-20, 0, 0}, {20, 0, 0}, RAYWHITE);
         DrawTriangle3D({21, 0, 0}, {20, 1, 0}, {20, -1, 0}, RAYWHITE);
