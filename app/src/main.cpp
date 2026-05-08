@@ -1,17 +1,21 @@
 
 #include "../../core/src/geometry/Generator.hpp"
+#include "../../core/src/geometry/MeshBuilder.hpp"
 #include "../../core/src/tokenizer/Lexer.hpp"
+#include "UI/UIManager.hpp"
 #include "fmt/core.h"
 #include <iostream>
 
 // Nur inkludieren, wenn wir NICHT im CLI-Modus sind
 #ifndef NO_UI
+#include "../../core/src/constants/UIConstants.hpp"
 #include "app/camera.hpp"
 #include "raylib.h"
 #include "rlgl.h"
 #endif
 
 void draw_grid();
+void draw_plotter(Model surfaceModel, Axiom::CameraManager &cameraManager);
 
 int main()
 {
@@ -41,72 +45,75 @@ int main()
         }
 
 #else
-        // --- NORMALER UI MODUS (RAYLIB) ---
         InitWindow(960, 1280, "Axiom");
 
         Axiom::CameraManager cameraManager;
 
-        // Auch im UI Modus können wir kurz die Tokens in die Konsole werfen
         Axiom::Lexer lexer("f(x) = x*2");
         lexer.tokenize();
         auto tokens = lexer.get_tokens();
 
         Axiom::Generator generator;
         Axiom::Expression expr;
-        expr.params = {true, false};
-        auto points = generator.generate(expr, {{-15, -15, -15}, {15, 15, 15}}, 300);
+        Axiom::UIManager uiManager;
+        expr.params = {true, true};
+        
+        bool clampZ = true;  // Toggle zwischen Clamp und Skip
+        
+        auto points = generator.generate(expr, {{-15, -15, -15}, {15, 15, 15}}, 200, clampZ);
 
-        /*for (const auto &token : tokens)
-        {
-                fmt::print("Token: Lexeme='{}', Type={}\n", token.lexeme, (int)token.type);
-        }
-
-        for (const auto &p : points)
-        {
-                fmt::print("Punkt: ({}, {}, {})\n", p.x, p.y, p.z);
-        }*/
+        Mesh surfaceMesh = Axiom::MeshBuilder::CreateMeshFromPoints(points, 200);
+        Model surfaceModel = LoadModelFromMesh(surfaceMesh);
+        surfaceModel.materials[0].maps[MATERIAL_MAP_DIFFUSE].color = Axiom::POINTS_COLOR_PLOTTER;
 
         SetTargetFPS(120);
-
-        Axiom::Vector3 point = points[0];
-        size_t index = 0;
 
         while (!WindowShouldClose())
         {
                 cameraManager.update();
-
-                BeginDrawing();
-                ClearBackground(DARKGRAY);
-
-                BeginMode3D(cameraManager.getRawCamera());
-                // draw_grid();
-                for (const auto &p : points)
-                {
-                        //DrawLine3D((Vector3){point.x, point.y, point.z}, (Vector3){p.x, p.y, p.z}, GREEN);
-                        DrawPoint3D({p.x, p.y, p.z}, GREEN);
-                        point = p;
-                        index++;
-                        if (index >= points.size())
-                        {
-                                index = 0;
-                                point = points[0];
-                        }
+                
+                // Toggle clampZ mit Leertaste
+                if (IsKeyPressed(KEY_SPACE)) {
+                        clampZ = !clampZ;
+                        UnloadModel(surfaceModel);
+                        auto newPoints = generator.generate(expr, {{-15, -15, -15}, {15, 15, 30}}, 200, clampZ);
+                        Mesh newMesh = Axiom::MeshBuilder::CreateMeshFromPoints(newPoints, 200);
+                        surfaceModel = LoadModelFromMesh(newMesh);
+                        surfaceModel.materials[0].maps[MATERIAL_MAP_DIFFUSE].color = Axiom::POINTS_COLOR_PLOTTER;
                 }
 
-                DrawLine3D({-20, 0, 0}, {20, 0, 0}, RAYWHITE);
-                DrawTriangle3D({21, 0, 0}, {20, 1, 0}, {20, -1, 0}, RAYWHITE);
-                DrawLine3D({0, -20, 0}, {0, 20, 0}, RAYWHITE);
-                DrawLine3D({0, 0, -20}, {0, 0, 20}, RAYWHITE);
+                BeginDrawing();
+                ClearBackground(Axiom::BACKGROUND_COLOR_PLOTTER);
+        
+                draw_plotter(surfaceModel, cameraManager);
 
-                EndMode3D();
+                uiManager.draw();
                 DrawFPS(10, 10);
+                DrawText(clampZ ? "Z: CLAMP (Press SPACE to SKIP)" : "Z: SKIP (Press SPACE to CLAMP)", 10, 30, 20, RAYWHITE);
                 EndDrawing();
         }
 
+        UnloadModel(surfaceModel);
         CloseWindow();
 #endif
 
         return 0;
+}
+
+void draw_plotter(Model surfaceModel, Axiom::CameraManager &cameraManager)
+{
+        BeginMode3D(cameraManager.getRawCamera());
+        
+        DrawModel(surfaceModel, {0, 0, 0}, 1.0f, WHITE);
+        
+        DrawModelWires(surfaceModel, {0, 0, 0}, 1.0f, Axiom::POINTS_COLOR_PLOTTER);
+
+        DrawLine3D({-20, 0, 0}, {20, 0, 0}, RAYWHITE);
+        DrawTriangle3D({21, 0, 0}, {20, 1, 0}, {20, -1, 0}, RAYWHITE);
+        DrawLine3D({0, -20, 0}, {0, 20, 0}, RAYWHITE);
+        DrawLine3D({0, 0, -20}, {0, 0, 20}, RAYWHITE);
+
+        EndMode3D();
 }
 
 void draw_grid()
@@ -125,79 +132,3 @@ void draw_grid()
         DrawGrid(20, 1.0f);
         rlPopMatrix();
 }
-
-/*
- *Der Kleber. Initialisiert das Fenster, startet den Loop, ruft den
- * input_handler auf und lässt den renderer alles zeichnen.
- */
-
-/*
-* Der Datenfluss (The "Happy Path")
-
-    User tippt x*x + y*y in der ui_layer ein.
-
-    Die app gibt den String an core::generator.
-
-    Der generator nutzt math::parser, berechnet alle Punkte und füllt ein
-core::mesh.
-
-    Die app::scene nimmt das mesh, lädt die Daten in die Buffer der Grafikkarte
-(VBO/VAO).
-
-    Der input_handler bemerkt ein Mausziehen und bewegt die camera.
-
-    Der renderer zeichnet alles mit den shaders neu.
-*
-*/
-
-/*
-#include "fmt/format.h"
-#include "app/input_handler.hpp"
-#include "app/renderer/scene.hpp"
-#include "app/ui_layer.hpp"
-#include "core/geometry/generator.hpp"
-
-// Hier kommen später die GLFW/OpenGL Includes hin
-// #include <GLFW/glfw3.h>
-
-int main(int argc, char *argv[])
-{
-    // 1. INITIALISIERUNG
-    // Fenster erstellen (GLFW), OpenGL Kontext laden (Glad/Glew)
-    fmt::print("Axiom Plotter wird gestartet...\n");
-
-    // 2. OBJEKTE ERSTELLEN
-    axiom::Generator generator;
-    axiom::Scene scene;
-    axiom::InputHandler input;
-    axiom::UILayer ui;
-
-    // Initialer Plot
-    auto initialMesh = generator.generate("x*x + y*y");
-    scene.loadMesh(initialMesh);
-
-    // 3. MAIN LOOP
-    while (!windowShouldClose)
-    {
-        // A. Input verarbeiten (Maus/Keyboard)
-        input.update();
-
-        // B. UI Zeichnen (ImGui)
-        ui.render();
-        if (ui.functionChanged())
-        {
-            // Happy Path: Neuer String -> Neues Mesh -> GPU Update
-            auto newMesh = generator.generate(ui.getFunctionString());
-            scene.loadMesh(newMesh);
-        }
-
-        // C. Rendering
-        scene.draw(); // Nutzt intern die Camera-Matrix vom input_handler
-
-        // D. Buffer Swapping
-        // glfwSwapBuffers(window);
-    }
-
-    return 0;
-}
-*/

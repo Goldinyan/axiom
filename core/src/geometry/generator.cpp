@@ -9,7 +9,7 @@ namespace Axiom
 
 Generator::Generator() {};
 
-std::vector<Vector3> Generator::generate(Expression expr, std::pair<Vector3, Vector3> limits, float step)
+std::vector<Vector3> Generator::generate(Expression expr, std::pair<Vector3, Vector3> limits, float step, bool clampZ)
 {
         bool check_x = true;
         bool check_y = true;
@@ -44,6 +44,8 @@ std::vector<Vector3> Generator::generate(Expression expr, std::pair<Vector3, Vec
         int x_steps = check_x ? resolution : 0;
         int y_steps = check_y ? resolution : 0;
 
+        // we have resolution * resoltion points, so with 100 res we have 10K points
+
         for (int i = 0; i <= x_steps; ++i)
         {
                 float x = (x_steps > 0)
@@ -68,15 +70,23 @@ std::vector<Vector3> Generator::generate(Expression expr, std::pair<Vector3, Vec
                         {
                                 float z = expr.eval(x, y);
 
-                                if (z > limits.second.z)
-                                        z = limits.second.z;
-                                if (z < limits.first.z)
-                                        z = limits.first.z;
-
-                                points.emplace_back(x, y, z);
+                                if (clampZ) {
+                                        // Clamp z auf die Limits
+                                        if (z > limits.second.z)
+                                                z = limits.second.z;
+                                        if (z < limits.first.z)
+                                                z = limits.first.z;
+                                        points.emplace_back(x, y, z);
+                                } else {
+                                        // Skip Punkte außerhalb der Limits
+                                        if (z > limits.second.z || z < limits.first.z)
+                                                continue;
+                                        points.emplace_back(x, y, z);
+                                }
                         }
                 }
         }
+
         auto end =
             std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 

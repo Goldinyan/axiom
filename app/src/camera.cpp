@@ -4,26 +4,15 @@
 // Nur kompilieren, wenn NO_UI NICHT definiert ist
 #ifndef NO_UI
 #include "raylib.h"
+#include "../../core/src/constants/UIConstants.hpp"
 
 static float angleAzi = -45.0f * DEG2RAD;
 static float angleElev = 20.0f * DEG2RAD;
-static float radius = 90.0f;
+static float radius = 70.0f;
 
 namespace Axiom
 {
-/*
-CameraManager::CameraManager()
-{
-        m_camera = {0};
-        m_camera.position = (Vector3){10.0f, 10.0f, 10.0f};
-        m_camera.target = (Vector3){0.0f, 0.0f, 0.0f};
-        m_camera.up = (Vector3){0.0f, 1.0f, 0.0f};
-        m_camera.fovy = 45.0f;
-        m_camera.projection = CAMERA_PERSPECTIVE;
 
-        m_rotating_speed = 0.0f;
-}
-*/
 CameraManager::CameraManager()
 {
         m_camera = {0};
