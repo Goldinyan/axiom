@@ -20,7 +20,7 @@ void Logger::log(LogLevel level, const std::string &message) {
 
   switch (level) {
   case LogLevel::INFO:
-    std::cout << "[INFO] ";
+    std::cout << "\033[35m[INFO]\033[0m ";
     break;
   case LogLevel::WARNING:
     std::cout << "\033[33m[WARN]\033[0m "; // Gelb

@@ -1,4 +1,4 @@
-#include "app/camera.hpp"
+#include "camera.hpp"
 #include "math.h"
 
 // Nur kompilieren, wenn NO_UI NICHT definiert ist

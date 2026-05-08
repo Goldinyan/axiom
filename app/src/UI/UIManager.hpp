@@ -20,8 +20,10 @@ public:
 
         void draw();
 
+        void init();
+        void CleanUp();
+
         std::string getFunctionInput() const { return m_functionBuffer; }
-        float getStepSize() const { return m_stepSize; }
 
 private:
         Sizes m_currentSize;
@@ -31,6 +33,5 @@ private:
 private:
         char m_functionBuffer[256];
         bool m_editMode;
-        float m_stepSize;
 };
 } // namespace Axiom

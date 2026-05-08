@@ -1,4 +1,7 @@
 #include "UIManager.hpp"
+#include "../../../extern/raygui/raygui.h"
+#include "../SettingsManager.hpp"
+#include "../core/src/utils/logger.hpp"
 #include "raylib.h"
 #include <filesystem>
 #include <iostream>
@@ -12,13 +15,14 @@ namespace Axiom
 UIManager::UIManager()
 {
         m_currentSize = MEDIUM;
-        m_stepSize = 50.0f;
         m_editMode = false;
         m_functionBuffer[0] = '\0'; // Leerer String
-        
+}
+
+void UIManager::init()
+{
 
         m_area = {0, GetScreenHeight() - m_baseHeight, (float)GetScreenWidth(), m_baseHeight};
-
 
         if (std::filesystem::exists("extern/raygui/style_jungle.rgs"))
         {
@@ -33,27 +37,42 @@ UIManager::UIManager()
 
 void UIManager::draw()
 {
-        int screenHeight = GetScreenHeight();
-        int screenWidth = GetScreenWidth();
-        int panelHeight = 200;
+        float &res = SettingsManager::getInstance().getResolutionRef();
+        float oldRes = res;
 
+        m_area = {0, (float)GetScreenHeight() - 200, (float)GetScreenWidth(), 200};
 
-        DrawRectangle(0, m_area.y, m_area.width, m_area.height, BLUE);
-        DrawLine(0, screenHeight - panelHeight, screenWidth, screenHeight - panelHeight, GRAY);
+        // 2. Panel zeichnen (Nutzt automatisch die Farben aus deinem .rgs Style!)
+        GuiPanel(m_area, NULL);
 
-        GuiLabel({20, (float)screenHeight - 180, 100, 40}, "Funktion f(x,y):");
-        if (GuiTextBox({20, (float)screenHeight - 160, 300, 50}, m_functionBuffer, 256, m_editMode))
+        float padding_x = 40.0f;
+        float padding_y = 20.0f;
+        float start_x = m_area.x + padding_x;
+        float start_y = m_area.y + padding_y;
+
+        GuiLabel({start_x, start_y, 150, 25}, "FUNKTION f(x, y)");
+        if (GuiTextBox({start_x, start_y + 25, 300, 40}, m_functionBuffer, 256, m_editMode))
         {
                 m_editMode = !m_editMode;
         }
 
-        
+        float slider_y = start_y + 80;
+        GuiLabel({start_x, slider_y, 150, 25}, "AUFLÖSUNG");
 
-        GuiLabel({20, (float)screenHeight - 110, 100, 20}, "Auflösung:");
-        GuiSlider({20, (float)screenHeight - 90, 200, 40}, "Low", "High", &m_stepSize, 10.0f, 100.0f);
+        GuiSlider({start_x, slider_y + 25, 200, 30}, "10", "", &res, 10.0f, 100.0f);
 
-        if (GuiButton({330, (float)screenHeight - 160, 100, 50}, "Plotten"))
+        GuiLabel({start_x + 210, slider_y + 25, 50, 30}, TextFormat("%.0f", res));
+
+        if(oldRes != res)
         {
+                SettingsManager::getInstance().changed = true;
         }
 }
+
+void UIManager::CleanUp()
+{
+        GuiLoadStyleDefault(); // entlädt custom
+        Logger::info("UIManager cleaned up.");
+}
+
 } // namespace Axiom
